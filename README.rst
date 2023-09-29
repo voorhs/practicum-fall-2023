@@ -15,16 +15,16 @@
 
 .. class:: center
 
-    :Название исследуемой задачи: Мое название работы
-    :Тип научной работы: M1P/НИР/CoIS
-    :Автор: Имя Отчество Фамилия
+    :Название исследуемой задачи: Generating Synthetic Data via Intent-Preserving and Intent-Corrupting Augmentations for Training Dialogue Embeddings
+    :Тип научной работы: M1P
+    :Автор: Алексеев Илья Алексеевич
     :Научный руководитель: степень, Фамилия Имя Отчество
     :Научный консультант(при наличии): степень, Фамилия Имя Отчество
 
 Abstract
 ========
 
-Purus sit amet luctus venenatis lectus magna fringilla. Condimentum id venenatis a condimentum vitae sapien. Auctor neque vitae tempus quam pellentesque nec nam aliquam. Eget egestas purus viverra accumsan in. Nam aliquam sem et tortor. Donec et odio pellentesque diam volutpat commodo. Odio pellentesque diam volutpat commodo sed egestas. Sit amet dictum sit amet justo. Pellentesque sit amet porttitor eget. Imperdiet sed euismod nisi porta lorem mollis aliquam ut. Quis varius quam quisque id diam vel quam elementum. Ornare lectus sit amet est placerat in. Vulputate dignissim suspendisse in est ante. Elit sed vulputate mi sit amet mauris. Egestas sed tempus urna et pharetra pharetra. Viverra tellus in hac habitasse platea dictumst vestibulum rhoncus.
+Text embeddings from pre-trained language models have been proven to be extraordinarily useful for various sentence-level tasks, such as pair classification, similarity estimation, and retrieval. Corresponding models are usually trained on large amounts of clean and diverse data using contrastive loss. Unfortunately, there are no such datasets for the domain of dialogue data. In this work, we describe the process of mining a synthetic dataset of dialogues for contrastive learning with hard negatives. We investigate various augmentation strategies for constructing dialogues with preserved or corrupted intents (positive and negative samples, respectively). To demonstrate the stated cleanliness and diversity, we train a dialogue encoder model and analyze its properties.
 
 Research publications
 ===============================
