@@ -13,8 +13,7 @@
   booktitle={Soft Computing and Pattern Recognition (SoCPaR), 2014 6th International Conference of},
   pages={312--318},
   year={2014},
-  organization={IEEE},
-  doi={10.1109/SOCPAR.2014.7008025}
+  organization={IEEE}
 }
 
 @article{hadash2018estimate,
@@ -22,4 +21,193 @@
   author={Hadash, Guy and Kermany, Einat and Carmeli, Boaz and Lavi, Ofer and Kour, George and Jacovi, Alon},
   journal={arXiv preprint arXiv:1804.09028},
   year={2018}
+}
+
+@INPROCEEDINGS{bow,
+  author={Qader, Wisam A. and Ameen, Musa M. and Ahmed, Bilal I.},
+  booktitle={2019 International Engineering Conference (IEC)}, 
+  title={An Overview of Bag of Words;Importance, Implementation, Applications, and Challenges}, 
+  year={2019},
+  volume={},
+  number={},
+  pages={200-204},
+  doi={10.1109/IEC47844.2019.8950616}}
+
+@article{SprckJones2021ASI,
+  title={A statistical interpretation of term specificity and its application in retrieval},
+  author={Karen Sp{\"a}rck Jones},
+  journal={J. Documentation},
+  year={2021},
+  volume={60},
+  pages={493-502},
+  url={https://api.semanticscholar.org/CorpusID:2996187}
+}
+
+@misc{mikolov2013efficient,
+      title={Efficient Estimation of Word Representations in Vector Space}, 
+      author={Tomas Mikolov and Kai Chen and Greg Corrado and Jeffrey Dean},
+      year={2013},
+      eprint={1301.3781},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@inproceedings{pennington-etal-2014-glove,
+    title = "{G}lo{V}e: Global Vectors for Word Representation",
+    author = "Pennington, Jeffrey  and
+      Socher, Richard  and
+      Manning, Christopher",
+    booktitle = "Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing ({EMNLP})",
+    month = oct,
+    year = "2014",
+    address = "Doha, Qatar",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D14-1162",
+    doi = "10.3115/v1/D14-1162",
+    pages = "1532--1543",
+}
+
+@misc{mccann2018learned,
+      title={Learned in Translation: Contextualized Word Vectors}, 
+      author={Bryan McCann and James Bradbury and Caiming Xiong and Richard Socher},
+      year={2018},
+      eprint={1708.00107},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@inproceedings{peters-etal-2018-deep,
+    title = "Deep Contextualized Word Representations",
+    author = "Peters, Matthew E.  and
+      Neumann, Mark  and
+      Iyyer, Mohit  and
+      Gardner, Matt  and
+      Clark, Christopher  and
+      Lee, Kenton  and
+      Zettlemoyer, Luke",
+    booktitle = "Proceedings of the 2018 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers)",
+    month = jun,
+    year = "2018",
+    address = "New Orleans, Louisiana",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/N18-1202",
+    doi = "10.18653/v1/N18-1202",
+    pages = "2227--2237",
+    abstract = "We introduce a new type of deep contextualized word representation that models both (1) complex characteristics of word use (e.g., syntax and semantics), and (2) how these uses vary across linguistic contexts (i.e., to model polysemy). Our word vectors are learned functions of the internal states of a deep bidirectional language model (biLM), which is pre-trained on a large text corpus. We show that these representations can be easily added to existing models and significantly improve the state of the art across six challenging NLP problems, including question answering, textual entailment and sentiment analysis. We also present an analysis showing that exposing the deep internals of the pre-trained network is crucial, allowing downstream models to mix different types of semi-supervision signals.",
+}
+
+@misc{xiao2023cpack,
+      title={C-Pack: Packaged Resources To Advance General Chinese Embedding}, 
+      author={Shitao Xiao and Zheng Liu and Peitian Zhang and Niklas Muennighof},
+      year={2023},
+      eprint={2309.07597},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@misc{wang2022text,
+      title={Text Embeddings by Weakly-Supervised Contrastive Pre-training}, 
+      author={Liang Wang and Nan Yang and Xiaolong Huang and Binxing Jiao and Linjun Yang and Daxin Jiang and Rangan Majumder and Furu Wei},
+      year={2022},
+      eprint={2212.03533},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@misc{li2023general,
+      title={Towards General Text Embeddings with Multi-stage Contrastive Learning}, 
+      author={Zehan Li and Xin Zhang and Yanzhao Zhang and Dingkun Long and Pengjun Xie and Meishan Zhang},
+      year={2023},
+      eprint={2308.03281},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@inproceedings{zhang-etal-2023-dialog,
+    title = "Dialog-Post: Multi-Level Self-Supervised Objectives and Hierarchical Model for Dialogue Post-Training",
+    author = "Zhang, Zhenyu  and
+      Shen, Lei  and
+      Zhao, Yuming  and
+      Chen, Meng  and
+      He, Xiaodong",
+    booktitle = "Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = jul,
+    year = "2023",
+    address = "Toronto, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.acl-long.564",
+    doi = "10.18653/v1/2023.acl-long.564",
+    pages = "10134--10148",
+    abstract = "Dialogue representation and understanding aim to convert conversational inputs into embeddings and fulfill discriminative tasks. Compared with free-form text, dialogue has two important characteristics, hierarchical semantic structure and multi-facet attributes. Therefore, directly applying the pretrained language models (PLMs) might result in unsatisfactory performance. Recently, several work focused on the dialogue-adaptive post-training (DialPost) that further trains PLMs to fit dialogues. To model dialogues more comprehensively, we propose a DialPost method, Dialog-Post, with multi-level self-supervised objectives and a hierarchical model. These objectives leverage dialogue-specific attributes and use self-supervised signals to fully facilitate the representation and understanding of dialogues. The novel model is a hierarchical segment-wise self-attention network, which contains inner-segment and inter-segment self-attention sub-layers followed by an aggregation and updating module. To evaluate the effectiveness of our methods, we first apply two public datasets for the verification of representation ability. Then we conduct experiments on a newly-labelled dataset that is annotated with 4 dialogue understanding tasks. Experimental results show that our method outperforms existing SOTA models and achieves a 3.3{\%} improvement on average.",
+}
+
+@misc{li2022future,
+      title={Back to the Future: Bidirectional Information Decoupling Network for Multi-turn Dialogue Modeling}, 
+      author={Yiyang Li and Hai Zhao and Zhuosheng Zhang},
+      year={2022},
+      eprint={2204.08152},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@article{soudani2023data,
+  title={Data Augmentation for Conversational AI},
+  author={Soudani, Heydar and Kanoulas, Evangelos and Hasibi, Faegheh},
+  journal={arXiv preprint arXiv:2309.04739},
+  year={2023}
+}
+
+@misc{zheng2023augesc,
+      title={AugESC: Dialogue Augmentation with Large Language Models for Emotional Support Conversation}, 
+      author={Chujie Zheng and Sahand Sabour and Jiaxin Wen and Zheng Zhang and Minlie Huang},
+      year={2023},
+      eprint={2202.13047},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@misc{schick2021generating,
+      title={Generating Datasets with Pretrained Language Models}, 
+      author={Timo Schick and Hinrich Schütze},
+      year={2021},
+      eprint={2104.07540},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+@misc{mohapatra2021simulated,
+      title={Simulated Chats for Building Dialog Systems: Learning to Generate Conversations from Instructions}, 
+      author={Biswesh Mohapatra and Gaurav Pandey and Danish Contractor and Sachindra Joshi},
+      year={2021},
+      eprint={2010.10216},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
+
+@inproceedings{wan-etal-2022-unified,
+    title = "A Unified Dialogue User Simulator for Few-shot Data Augmentation",
+    author = "Wan, Dazhen  and
+      Zhang, Zheng  and
+      Zhu, Qi  and
+      Liao, Lizi  and
+      Huang, Minlie",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2022",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.findings-emnlp.277",
+    doi = "10.18653/v1/2022.findings-emnlp.277",
+    pages = "3788--3799",
+    abstract = "Pre-trained language models have shown superior performance in task-oriented dialogues. However, existing datasets are on limited scales, which cannot support large-scale pre-training. Fortunately, various data augmentation methods have been developed to augment large-scale task-oriented dialogue corpora. However, they heavily rely on annotated data in the target domain, which require a tremendous amount of data collection and human labeling work. In this paper, we build a unified dialogue user simulation model by pre-training on several publicly available datasets. The model can then be tuned on a target domain with few-shot data. The experiments on a target dataset across multiple domains show that our proposed model brings remarkable performance increases through data augmentation.",
+}
+
+@misc{kim2021neuralwoz,
+      title={NeuralWOZ: Learning to Collect Task-Oriented Dialogue via Model-Based Simulation}, 
+      author={Sungdong Kim and Minsuk Chang and Sang-Woo Lee},
+      year={2021},
+      eprint={2105.14454},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
 }
