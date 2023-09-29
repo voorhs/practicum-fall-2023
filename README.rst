@@ -18,7 +18,7 @@
     :Название исследуемой задачи: Generating Synthetic Data via Intent-Preserving and Intent-Corrupting Augmentations for Training Dialogue Embeddings
     :Тип научной работы: M1P
     :Автор: Алексеев Илья Алексеевич
-    :Научный руководитель: степень, Фамилия Имя Отчество
+    :Научный руководитель: Кузнецов Денис
     :Научный консультант(при наличии): степень, Фамилия Имя Отчество
 
 Abstract
