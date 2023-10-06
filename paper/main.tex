@@ -90,89 +90,49 @@ However, the more specific the data structure, the more challenging it is to min
 Data is almost always scarce when it comes to building dialogue models. To date, numerous methods for generating synthetic dialogues have been devised \cite{kim2021neuralwoz, mohapatra2021simulated, wan-etal-2022-unified, zheng2023augesc}, but they do not generate dialogues in pairs \cite{schick2021generating}, as is conceptually important for contrastive embedding learning. The simplest way to expand a training dataset is through augmentation \cite{soudani2023data}. However, we find them insufficient, as they do not significantly alter the structure of the dialogue. In this work, we will describe a method for constructing a synthetic dataset of dialogue pairs using various augmentations that preserve or alter the set of intents in the dialogue. These augmentations significantly affect its structure.
 
 
-\section{Headings: first level}
-\label{sec:headings}
+\section{Approach}
 
-\lipsum[4] See Section \ref{sec:headings}.
+\subsection{Augmentations}
 
-\subsection{Headings: second level}
-\lipsum[5]
-\begin{equation}
-\xi _{ij}(t)=P(x_{t}=i,x_{t+1}=j|y,v,w;\theta)= {\frac {\alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}{\sum _{i=1}^{N} \sum _{j=1}^{N} \alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}}
-\end{equation}
+\textbf{Token Insertion.} One of the simple yet effective ways to augment text is to lengthen it by inserting additional tokens. For this purpose, we added a special token `<mask>` to random places in the dialogues and used transformer models trained on the MLM task to fill these masks. Insertion was rejected if the token proposed by the model was only a fragment of a word (BPE, Wordpiece) or if the prediction probability was below a manually set threshold. To take the dialogue context into account during token insertion, multiple consecutive responses or the entire dialogue were fed into the MLM model at once.
 
-\subsubsection{Headings: third level}
-\lipsum[6]
+\textbf{Token Replacement.} This method is identical to the previous one, except that instead of adding the `<mask>` token between tokens in the original dialogue, some tokens in the original dialogue are replaced.
 
-\paragraph{Paragraph}
-\lipsum[7]
+\textbf{Back Translation.} Translation from the original language to another language and then back to the original language. MT models were used for this purpose.
 
-\section{Examples of citations, figures, tables, references}
-\label{sec:others}
-\lipsum[8] \cite{kour2014real,kour2014fast} and see \cite{hadash2018estimate}.
+\textbf{Shuffling Responses.} Previous augmentations modify the dialogue within individual phrases since they are methods applicable to arbitrary text data. It seems essential to learn how to change the order of responses in a dialogue to create a valid example of meaningful dialogue. For this purpose, we propose using models that measure the similarity between responses within a dialogue \ref{fig:pairwise}. Using these distances, it is possible to cluster responses within each dialogue. Experiments showed that these clusters represent significant individual stages of the dialogue that can be shuffled with each other.
 
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations
-appropriate for use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-
-
-\subsection{Figures}
-\lipsum[10] 
-See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of the first footnote.}
-\lipsum[11] 
-
-\begin{figure}
-  \centering
-  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
-  \label{fig:fig1}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/dialogue-shufflers-pairwise.drawio.pdf}
+    \caption{Model for measuring the distance between responses in a dialogue.}
+    \label{fig:pairwise}
 \end{figure}
 
-\subsection{Tables}
-\lipsum[12]
-See awesome Table~\ref{tab:table}.
+\textbf{Shortening the Dialogue.} Individual clusters of responses within the dialogue can be discarded, resulting in a dialogue with fewer responses.
 
-\begin{table}
- \caption{Sample table title}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule(r){1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
-  \label{tab:table}
-\end{table}
+\textbf{Lengthening the Dialogue.} A model was trained to arrange responses in a dialogue based on a given list of responses. This transformer takes the text embeddings of each response as input without specifying information about the position of the response in the original dialogue. It outputs ranks or probabilities that can be used to "sort" the responses. If some external responses are added to the original dialogue, this model generates a new, longer dialogue.
 
-\subsection{Lists}
-\begin{itemize}
-\item Lorem ipsum dolor sit amet
-\item consectetur adipiscing elit. 
-\item Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
-\end{itemize}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/dialogue-shufflers-listwise-lm-1.drawio.pdf}
+    \caption{Model for extending the dialogue through sorting.}
+    \label{fig:listwise}
+\end{figure}
 
+\textbf{Preserving and Altering Intent.} The augmentations mentioned above can be configured to either preserve or alter intent. As augmentations that preserve intent, we used all operations except token replacement, which was used to select hard negative examples.
 
-\section{Conclusion}
-Your conclusion here
+\subsection{Dialogue Encoder}
+
+\textbf{BERT.} As a baseline method for vectorization, we use BERT without any modifications. We input the dialogue as \texttt{[CLS] ut1 [SEP] ut2 [SEP] ut3 [SEP]}, and the output is the averaged vectors of the hidden state of the `SEP` tokens.
+
+\textbf{HSSA and BiDeN.} For slightly advanced dialogue language models, we use HSSA and BiDeN.
+
+For training dialogue encoders, we use contrastive learning with in-batch negative examples and hard negative examples:
+$$
+\mathcal{L}=-\log{\exp(\cos(x_i,y_i))\over\sum_{j=1}^B\exp(\cos(x_i,y_j))},
+$$
+
 
 \section*{Acknowledgments}
 This was was supported in part by......
