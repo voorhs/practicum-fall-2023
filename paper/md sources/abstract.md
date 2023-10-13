@@ -1,0 +1,7 @@
+- Большие чистые и разнообразные данные важны для обучения языковых моделей архитектуры трансформер
+- Текстовые эмбеддеры позволяют решать самые разные задачи связанные с текстовыми данными
+- Таких моделей еще нет для диалоговых данных
+- Мы решим эту проблему путем создания синтетического диалогового датасета 
+- Синтез осуществляется за счет применения различных аугментаций к исходной коллекции диалогов. Эти аугментации делятся на два типа: сохраняющие совокупность тем в диалоге и искажающие
+
+Text embedding from pre-trained language models are proven to be extraordinary useful for various sentense-level tasks, such as pair classification, similarity estimation and retrieval. Corresponding models are usually trained on large amount of clean and diverse data via contrastive loss. Unfortunately, there are no such datasets for domain of dialogue data. In this work, we describe the process of mining synthetic dataset of dialogues for contrastive learning with hard negatives. We investigate various augmentation strategies for constructing dialogues with preserved or corrupted intents (positive and negative samples respectively). To prove stated cleanliness and diversity we train dialogue encoder model and analyze its properties.
