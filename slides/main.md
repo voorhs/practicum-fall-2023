@@ -3,7 +3,7 @@ marp: true
 math: true
 ---
 
-![bg right height:500](figures/project-visualization.drawio.svg)
+![bg right height:500](../figures/project-visualization.drawio.svg)
 
 Specifics:
 - task-oriented dialogues
