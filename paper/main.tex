@@ -6,6 +6,7 @@
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
+\usepackage[dvipsnames]{xcolor}
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
@@ -15,6 +16,17 @@
 \usepackage{fancyhdr}       % header
 \usepackage{graphicx}       % graphics
 \graphicspath{{figures/}}     % organize your images and other figures under figures/ folder
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=teal,
+    % filecolor=magenta, 
+    urlcolor=magenta,
+    citecolor=teal,
+    % pdftitle={GD},
+    % pdfpagemode=FullScreen,
+    % linktoc=all
+    }
 
 \usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools,esint,eucal}  %math
 \usepackage{subcaption}
@@ -28,7 +40,7 @@
 % \fancyhead[RE]{Firstauthor and Secondauthor} % Firstauthor et al. if more than 2 - must use \documentclass[twoside]{article}
   
 %% Title
-\title{Generating Synthetic Data via Intent-Preserving and Intent-Corrupting Augmentations for Multi-task Training Dialogue Embeddings.
+\title{Contrastive Learning with Intent-Preserving and Intent-Corrupting Augmentations for Training Dialogue Embeddings.
 %%%% Cite as
 %%%% Update your official citation here when published 
 \thanks{\textit{\underline{Citation}}: 
@@ -37,13 +49,11 @@
 
 \author{
   Ilya Alekseev \\
-  Neural Networks and Deep Learning Lab \\
-  Moscow Institute of Physics and Technology \\
+  Lomonosov Moscow State University \\
   \texttt{ilya\_alekseev\_2016@list.ru} \\
   %% examples of more authors
    \And
   Denis Kuznetsov \\
-  Neural Networks and Deep Learning Lab \\
   Moscow Institute of Physics and Technology \\
   \texttt{kuznetsov.dp@phystech.edu} \\
   %% \AND
@@ -69,22 +79,22 @@
 
 
 \begin{abstract}
-Text embeddings from pre-trained language models have been proven to be extraordinarily useful for various sentence-level tasks, such as pair classification, similarity estimation, and retrieval. Corresponding models are usually trained on large amounts of clean and diverse data using contrastive loss. Unfortunately, there are no such datasets for the domain of dialogue data. In this work, we describe the process of mining a synthetic dataset of dialogues for contrastive learning with hard negatives. We investigate various augmentation strategies for constructing dialogues with preserved or corrupted intents (positive and negative samples, respectively). To demonstrate the stated cleanliness and diversity, we train a dialogue encoder model and analyze its properties.
+Text embeddings from pre-trained language models have been proven to be extraordinarily useful for various sentence-level tasks, such as pair classification, similarity estimation, and retrieval. Corresponding models are usually trained on large amounts of clean and diverse data using contrastive loss. Unfortunately, there are no such datasets for the domain of dialogue data. In this work, we describe the process of mining a synthetic dataset of dialogues for contrastive learning with hard negative samples. We apply various augmentation strategies for constructing dialogues with preserved or corrupted sets of intents. We train dialogue embeddings and report its performance on transfer learning tasks: domain classification, intent similarity, dialogue retrieval.
 \end{abstract}
 
 
 % keywords can be removed
-\keywords{text embedding \and dialogue \and synthetic data \and augmentation \and natural language processing}
+\keywords{text embedding \and dialogue \and augmentation \and natural language processing \and contrastive learning}
 
 
 \section{Introduction}
-Obtaining embeddings is one of the key tasks in machine learning and popular one in recent years. Vector representation of an object is a convenient mathematical object. If an embedding accurately and comprehensively encodes the semantics of the original data, it opens up the possibility of using it in a wide range of tasks.
+Obtaining embeddings is one of the key tasks in machine learning and popular one in recent years, because vector representation of an object is a convenient mathematical object. If an embedding accurately and comprehensively encodes the semantics of the original data, it opens up the possibility of using it in a wide range of downstream tasks.
 
-In the field of natural language processing, classical methods for text vectorization such as bag of words \cite{bow} and tf-idf \cite{SprckJones2021ASI} have long been discovered. Thanks to deep learning, we have witnessed remarkable word vectorizations such as word2vec \cite{mikolov2013efficient} and GloVe \cite{pennington-etal-2014-glove}, which convey the semantic similarity between words; CoVe \cite{mccann2018learned} and ELMo \cite{peters-etal-2018-deep}, which encode information about the surrounding context. Recently, powerful encoder models have emerged that produce general-purpose text embeddings \cite{xiao2023cpack, wang2022text, li2023general}. They incorporate so much semantic information about texts that it can be applied to tasks such as classification, clustering, ranking, semantic textual similarity, and more. The success of these models is largely attributed to the use of contrastive learning on massive datasets. 
+In the field of natural language processing, classical methods for text vectorization such as bag of words \cite{bow} and tf-idf \cite{SprckJones2021ASI} have long been discovered. Thanks to deep learning, we have witnessed remarkable word vectorization techniques such as word2vec \cite{mikolov2013efficient} and GloVe \cite{pennington-etal-2014-glove}, which convey the semantic similarity between words; CoVe \cite{mccann2018learned} and ELMo \cite{peters-etal-2018-deep}, which encode information about the surrounding context. Recently, powerful encoder models have emerged that produce general-purpose text embeddings \cite{xiao2023cpack, wang2022text, li2023general}. They incorporate so much semantic information about texts that it can be applied to tasks such as classification, clustering, ranking, semantic textual similarity, and more \cite{muennighoff2023mteb}. The success of these models is largely attributed to the use of contrastive learning on massive datasets. 
 
-However, the more specific the data structure, the more challenging it is to mine a large dataset. As of today, there are no encoding methods for entire dialogues. In other words, there is no way to obtain a dense vector representation that conveys universal information about a dialogue. There are language models that adapt successfully to the hierarchical and temporal nature of dialogue \cite{zhang-etal-2023-dialog, li2022future}, but they only address tasks at the token and utterance levels, not at the dialogue level. There are text encoders for utterances in a dialogue \cite{henderson2020convert, Zhou2022}, but not for the entire dialogue.
+However, the more specific the data structure, the more challenging it is to mine a large dataset. Language models, such as those presented in \cite{zhang-etal-2023-dialog, li2022future}, have demonstrated successful adaptation to the hierarchical and temporal characteristics of dialogues. However, it is important to note that their training primarily involves inter-token and inter-utterance tasks rather than inter-dialogue tasks.
 
-Data is almost always scarce when it comes to building dialogue models. To date, numerous methods for generating synthetic dialogues have been devised \cite{kim2021neuralwoz, mohapatra2021simulated, wan-etal-2022-unified, zheng2023augesc}, but they do not generate dialogues in pairs \cite{schick2021generating}, as is conceptually important for contrastive learning. The simplest way to expand a training dataset is through augmentation \cite{soudani2023data}. However, we find them insufficient, as they do not significantly alter the structure of the dialogue. In this work, we will describe a method for constructing a synthetic dataset of dialogue pairs using various augmentations that preserve or alter the set of intents in the dialogue. These augmentations can be used for contrastive learning together with other tasks for pretraining powerful dialogue embeddings.
+Data is almost always scarce when it comes to building dialogue models. To date, numerous methods for generating synthetic dialogues have been devised \cite{kim2021neuralwoz, mohapatra2021simulated, wan-etal-2022-unified, zheng2023augesc, schick2021generating}, but they do not generate dialogues in pairs, as it is conceptually important for training SoTA text embedding. The simplest way to generate pairs is through augmentation \cite{soudani2023data}. In this work, we will describe a method for constructing a dialogue dataset for contrastive learning using various augmentations that preserve or alter the set of intents in the dialogue. These augmentations can be used for contrastive learning for pretraining powerful dialogue embeddings.
 
 \section{Problem Formulation}
 
@@ -92,13 +102,11 @@ Data is almost always scarce when it comes to building dialogue models. To date,
 $$
 d=[(u_1, s_1), \ldots, (u_n, s_n)],
 $$
-where $u_i$ represents the utterance of a participant in the dialogue at step $s_i$. We are interested in so-called task-specific dialogues with two participants: the system and the user. With some approximation, they can be described as dialogues between a customer and a service worker (or a robot). During the dialogue, the customer has various intents that the worker strives to fulfill. These intents can be finding a restaurant and booking a table, calling a taxi, or purchasing a train ticket. We will consider two dialogues similar if they have a similar set of intents.
+where $u_i$ represents the utterance of a participant in the dialogue at step $s_i$. We are interested in so-called task-oriented dialogues with two participants: the system and the user. With some approximation, they can be described as dialogues between a customer and a service worker (or a robot). During the dialogue, the customer has various intents that the worker strives to fulfill. These intents can be finding a restaurant and booking a table, calling a taxi, or purchasing a train ticket. We will consider two dialogues similar if they have a similar set of intents.
 
-\textbf{Augmentation.} By augmentation, we mean the generation of new valid examples by transforming existing ones. Valid examples are those that sufficiently resemble real-world data. Let $D$ be the set of valid objects. Then augmentation is a non-identical mapping $\text{aug}(d)$ that does not take objects outside the set of valid objects:
-$$
-\text{aug}: D\to D.
-$$
-Typically, this generation is implemented by making small changes to a valid training object. For example, image augmentation might involve slight rotations or blurring. Text augmentation is especially challenging because validity implies adherence to language rules, meaningfulness and a certain style. In the case of dialogues, it is necessary to maintain the structure and role differentiation, as indicated earlier.
+\textbf{Augmentation.} By augmentation, we mean the generation of new valid examples by transforming existing ones. Valid examples are those that sufficiently resemble real-world data. Let $D$ be the set of valid objects. Then augmentation is a non-identical mapping $\text{aug}(d)$ that does not take objects outside the set of valid objects: $\text{aug}: D\to D.$
+
+Typically, this generation is implemented by making small changes to a valid training object. For example, image augmentation might involve slight rotations or blurring. Text augmentation is especially challenging because validity implies adherence to language rules, meaningfulness and a certain style. In the case of dialogues, it is necessary to maintain the structure and role differentiation.
 
 \textbf{Embedding.} Embedding is a mapping of $D$ to a vector space:
 $$
@@ -108,17 +116,75 @@ For an object $d$, its embedding $e(d)$ should convey some semantics of $d$. Thi
 
 \section{Related Works}
 
-\texttt{this section is incomple, this is still a draft }
+\texttt{this section is incomplete, this is still a draft }
 
-AugSBERT \cite{thakur2021augmented} can be viewed as the similar approach to ours one, but their augmentation uses an already presented dataset of text pairs, which is absent in our case.
+\subsection{Text Embedding}
 
-\section{Approach}
+One of the breakthroughs in text embedding came from the need for solving the task of semantic textual similarity \cite{reimers2019sentencebert}, i.e. comparing texts with each other. Previously existing methods were either weak (averaging word embeddings) or required enormous amount of computation (BERT cross-encoder). Comparing texts with bi-encoder is performed via averaging hidden states from the last transformer block of language model or taking hidden state of special token \texttt{[CLS]}. This setting opens up a possibility for clustering, retrieval, pair classification etc. within text domain \cite{muennighoff2023mteb}.
+
+\subsection{Contrastive Learning}
+
+To make the encoder produce rich vector representations, it is necessary to train it with tasks where semantic features are engaged. A popular one is contrastive learning:
+$$
+\mathcal{L}=-\log{\exp(\text{sim}(x,y))\over\sum_{z}\exp(\text{sim}(x,z))}.
+$$
+Here, $x=e_\theta(a), y=e_\theta(b)$ are embeddings of a pair of semantically similar objects and $z=e_\theta(c)$ is semantically distant from $x$, sim is a metric similarity function (e.g. cosine). This task trains model parameters $\theta$ to make embeddings convey semantic similarity as cosine similarity. 
+
+This objective can be viewed as a special case of self-supervised learning, that long been discovered in the field of computer vision \cite{noroozi2017unsupervised, doersch2017multitask, wu2018unsupervised, oord2019representation}. This unsupervised approaches introduced a new view of transfer learning, allowing to advance from learning models to learning representations, which are more convenient to use for downstream tasks.
+
+% The main problem for contrastive learning is how to mine positive pairs and negative samples. One optimization step of contrastive learning can be viewed as a motion in the embedding space, in which positive objects attract to and negative pairs move away from each other. If positive and negative samples are not representative, this motion is senseless or inefficient.
+
+One of the most well-known methods for negative sampling was introduced by word2vec \cite{mikolov2013efficient} and it is to make random sampling from the dataset. Present-day methods with random negative sampling (e.g. OpenAI embeddings \cite{neelakantan2022text}) implement this idea as in-batch negative sampling and rely on large batch. Another idea is to use hard negative samples \cite{xiong2020approximate, feng2022languageagnostic}, which are the closest to positive pair sample among all negative samples. 
+
+% \begin{figure}[!ht]
+%     \begin{subfigure}[t]{0.25\linewidth}
+%         \includegraphics[width=1\linewidth]{figures/in-batch.drawio.pdf}
+%         \caption{in-batch}
+%         \label{fig:in-batch}
+%     \end{subfigure}
+%     \begin{subfigure}[t]{0.25\linewidth}
+%         \includegraphics[width=1\linewidth]{figures/large-batch.drawio.pdf}
+%         \caption{large batch}
+%         \label{fig:large-batch}
+%     \end{subfigure}
+%     \begin{subfigure}[t]{0.25\linewidth}
+%         \includegraphics[width=1\linewidth]{figures/hard-negatives.drawio.pdf}
+%         \caption{hard negatives}
+%         \label{fig:hard-negatives}
+%     \end{subfigure}
+%     \centering
+%     \caption{Negative sampling. Conceptual view on contrastive learning.}
+% \end{figure}
+
+The most efficient way of mining positive pairs is to use supervision. For example, datasets on NLI (natural language inference), QA (question answering), fact verification, paraphrases contain pairs of semantically similar texts and are appropriate for training text embedding \cite{li2023general}. This data is extremely clean, but scarce. Another way is to scrap data from web pages, such as QA forums (Quora), social media (Reddit), etc. This data is large, but can be noisy. When there are no any facility like supervised or scrapped pairs, augmentation is the last variant. Two augmented views of the same object must preserve semantics, that are essential for this object, but provide sufficiently hard task for a model of discriminating one positive sample from the rest of negative ones. 
+
+Present-day SoTA text embeddings such as BGE \cite{xiao2023cpack}, GTE \cite{li2023general}, E5 \cite{wang2022text} follow one pipeline of training. First, a retrieval-oriented language model is trained \cite{xiao2022retromae, gao-callan-2021-condenser}, that is a BERT-like model that can efficiently aggregate global information about input sequence. Second, a general-purpose fine-tuning is performed on a large weakly supervised text pairs with large batch contrastive learning. Third, task-specific fine-tuning is performed on supervised text pairs with 
+contrastive learning with hard negative samples.
+
+\subsection{Similar Approaches}
+
+AugSBERT \cite{thakur2021augmented} cannot be viewed as the similar approach to ours. Its augmentation uses an already presented dataset of text pairs, which is absent in our case.
+
+\textbf{Text embedding.} CERT \cite{fang2020cert} utilizes back-translation for mining positive pairs. ConSERT \cite{yan-etal-2021-consert} utilizes various augmentations at the token-level. Doc2vecC \cite{luo2021unsupervised} utilizes thesaurus-based augmentations and back-translation.
+
+\textbf{Dialogue embedding.} Dial2vec \cite{liu2022dial2vec} modifies transformer architecture by adding cross-attention between utterances of different participants. DialogueCSE \cite{liu2021dialoguecse} adds cross-attention between utterances of different stages of a dialogue.
+
+Our approach is distinct from these above:
+\begin{itemize}
+    \item our augmentations do not take objects outside the set of valid objects (do not violate grammars and meaningfulness), because our augmentations are thoroughly designed with context-aware language models in contrast to ConSERT that simply shuffles and deletes tokens leaving only lexical info in touch
+    \item our augmentations form a full-fledged set of transformations that construct non-obvious examples, not just paraphrasing or token-level replacements
+    \item our approach doesn't modify BERT architecture
+\end{itemize}
+
+\section{Method}
+
+In this section, we describe our method. It can be divided into two stages. At the first stage, we develop and make augmentations for dialogue data. In result, the dataset consists of samples with following schema: original dialogue, set of augmentations with preserved intents, set with corrupted intents. At the second stage, we apply the contrastive learning.
 
 \subsection{Augmentations} \label{sec:aug}
 
-\textbf{Token Insertion.} One of the simple yet effective ways to augment text is to lengthen it by inserting extra tokens. For this purpose, we added a special token `<mask>` to random places in the dialogues and used transformer models trained on the MLM task to fill these masks \cite{devlin2019bert}. Insertion is rejected if the token proposed by the model is only a fragment of a word \cite{wu2016googles, sennrich-etal-2016-neural} or if the prediction probability is below a manually set threshold. To take the dialogue context into account during token insertion, multiple consecutive responses were fed into the mask-filling model at once as a compromise between feeding single utterances and entire dialogue.
+\textbf{Token Insertion.} One of the simple yet effective ways to augment text is to lengthen it by inserting extra tokens. For this purpose, we added a special token \texttt{<mask>} to random places in the dialogues and used transformer models trained on the MLM task \cite{devlin2019bert} to fill these masks. Insertion is rejected if the token proposed by the model is only a fragment of a word \cite{wu2016googles, sennrich-etal-2016-neural} or if the prediction probability is below a manually set threshold. To take the dialogue context into account during token insertion, multiple consecutive responses were fed into the mask-filling model at once as a compromise between feeding single utterances and entire dialogue.
 
-\textbf{Token Replacement.} This method is identical to the previous one, except that instead of adding the `<mask>` token, some tokens in the original dialogue are replaced. In this case, the mask-filling model is fed with single utterances to make replacements more diverse and random.
+\textbf{Token Replacement.} This method is identical to the previous one, except that instead of adding the \texttt{<mask>} token, some tokens in the original dialogue are replaced. In this case, the mask-filling model is fed with single utterances to make replacements more diverse and random.
 
 \textbf{Back Translation.} Translation from the original language to another language and then back to the original language. Neural machine translation models were used for this purpose \cite{TiedemannThottingal}.
 
@@ -131,21 +197,46 @@ AugSBERT \cite{thakur2021augmented} can be viewed as the similar approach to our
 The augmentations mentioned above can be configured to either preserve or alter intent. Specifically, token replacement can be viewed as intent-corrupting augmentation, because all the keywords such as "restaurant", "taxi" etc. tend to be replaced. Pruning dialogue may remove some intents, but the result is still much similar to original dialogue, since its intents are fully encompassed by the original dialogue's intents. 
 Shuffling utterances doesn't change any intents, it only changes their order. The rest of augmentations preserves intents because they either perform paraphrasing (back translation), or add new information (token insertion, lengthening dialogue).
 
-To expand the set of augmentations even further, we use a composition of several. More details about augmentation implementations are presented in appendix.
+To expand the set of augmentations even further, we use a composition of several ones. For more details on augmentation implementations, please refer to Appendix \ref{app:aug}.
 
 \subsection{Dialogue Encoder Architecture}
 
-As a baseline method for vectorization, we use RoBERTa \cite{liu2019roberta} without any modifications. The input is \texttt{[CLS] ut1 [SEP] ut2 [SEP] ut3 [SEP]}, and the output is the hidden state of \texttt{[CLS]} token from the last layer. 
+As a model for embedding, we try BERT \cite{devlin2019bert}, RoBERTa \cite{liu2019roberta}, RetroMAE \cite{xiao2022retromae} without any modifications. The input is \texttt{[CLS] ut1 [SEP] ut2 [SEP] ut3}, and the output is the hidden state of \texttt{[CLS]} token from the last layer. 
 
-For a slightly advanced dialogue language model, we use HSSA \cite{zhang-etal-2023-dialog}. It uses BERT \cite{devlin2019bert} as a backbone and modifies its attention to capture the hierarchical structure of dialogue and reach the computational trade-off between feeding a transformer separate utterances and feeding an entire dialogue.
+Also, we experiment with a slightly advanced dialogue language model, HSSA \cite{zhang-etal-2023-dialog}. It uses BERT as a backbone and modifies its attention mechanism to capture the hierarchical structure of dialogue and reach the computational trade-off between feeding a transformer separate utterances and feeding an entire dialogue.
 
-\subsection{Pre-train Tasks}
+\subsection{Pre-train Task} \label{sec:pretrain}
 
-To make the encoder produce rich vector representations, it is necessary to train it to perform tasks where semantic features are engaged. A popular task is contrastive learning:
-$$
-\mathcal{L}=-\log{\exp(\text{sim}(x,y))\over\sum_{z}\exp(\text{sim}(x,z))}.
-$$
-Here, $x=e_\theta(a), y=e_\theta(b)$ are embeddings of a pair of semantically similar objects and $z=e_\theta(c)$ is semantically distant from $x$, $\text{sim}$ is a metric similarity function. This task trains embeddings to convey semantic similarity as metric similarity.
+In our case, $a, b$ are two intent-preserving augmentations of the same dialogue, and the remaining dialogues from the training batch are used as negative examples. This task simulates the second stage of training general-purpose text embeddings, which uses a large batch and weakly supervised text pairs. In addition to this, in order to reduce required batch size, we utilize intent-corrupting augmentations as hard negative samples. Notably, the technique with two augmentations and dual encoder resembles BYOL \cite{grill2020bootstrap}, well-known method for self-supervised learning \texttt{(maybe move this sentence to Related Works)}.
+
+\subsection{Evaluation}
+
+We evaluate dialogue embeddings in transfer learning setting. Specifically, our evaluation methods utilize embeddings as features, without modifying the encoder model itself. Inspired by \cite{liu2022dial2vec} we employ these evaluation methods: 1) domain classification, 2) dialogue retrieval, 3) intent similarity. Evaluation is performed on MultiWOZ 2.2 dataset \cite{zang2020multiwoz}.
+
+\textbf{Domain classification.} The goal is to predict in which domain a dialogue is taking place. In dataset there are 7 domains: attraction, bus, hospital, hotel, restaurant, taxi, train. Each dialogue can take place in multiple domains at once. The method is to train a linear classifier upon dialogue embedding, this is the so-called linear probe evaluation, that is used in many works. F1-macro is used to measure quality.
+
+\textbf{Dialogue retrieval.} For each dialogue from validation split, the goal is to retrieve dialogues from train split with at least one domain in common. Ranking score is calculated as cosine similarity between query and answer embeddings. Mean average precision at 100 is used to measure quality.
+
+\textbf{Intent similarity.} We sample pairs of dialogues from train and validation splits of dataset. A linear classifier is trained on the former pairs and evaluated on the latter pairs using Pearson correlation between predicted similarity scores and gold ones. The gold scores are obtained using DGAC clustering \cite{dgac}. Clusters represent intents of dialogue participants. Hence, each dialogue can be associated with a set of intents. We define gold intent similarity of two dialogues as a dice similarity between their sets of intents.
+
+\section{Experiments}
+
+\textbf{Dataset.} In all experiments, we used the same dataset of dialogues. This dataset is a combination of several task-oriented dialogue datasets from DialogStudio \cite{zhang2023dialogstudio}. All the dialogues were filtered based on their length, resulting in a dataset comprising 501K dialogues. For more details on the dataset used, please refer to Appendix \ref{app:dataset}.
+
+\textbf{Baseline Solution.} As our baseline solution, we employ BERT and BERT-RetroMAE without the pretraining method proposed by us. The results are presented in Table \ref{tab:eval}.
+
+\begin{table}[!htb]
+    \centering
+    \begin{tabular}{c|c|c|c|c}
+        & Service Clf & Categorization & Relatedness & Retrieval \\
+        \hline
+        BERT & 0.49 & & & \\
+        BERT-RetroMAE & & & & \\
+        BERT + Contr loss & 0.68 & & &
+    \end{tabular}
+    \caption{Dialogue embedding evaluation results.}
+    \label{tab:eval}
+\end{table}
 
 \section*{Acknowledgments}
 This was was supported in part by......
@@ -155,7 +246,7 @@ This was was supported in part by......
 \bibliography{references}  
 
 \appendix
-\section{Dialogue Dataset}
+\section{Dialogue Dataset} \label{app:dataset}
 Large dataset is important for contrastive learning. For training our models, we took a merge of some task-oriented datasets from DialogStudio collection \cite{zhang2023dialogstudio}. All of them are listed in the table \ref{tab:dataset}.
 
 \begin{table}[!htb]
@@ -179,7 +270,7 @@ Large dataset is important for contrastive learning. For training our models, we
         \textbf{Total} & & & \\
         \textbf{Filtered} & 501K & 6320K & 83.7M
     \end{tabular}
-    \caption{All the datasets are taken from DialogStudio collection \cite{zhang2023dialogstudio}}
+    \caption{All the datasets are taken from DialogStudio collection \cite{zhang2023dialogstudio}. BERT tokenizer is used to count \# tokens column.}
     \label{tab:dataset}
 \end{table}
 
@@ -192,7 +283,7 @@ As mentioned in Section \ref{sec:aug}, we trained special models to perform dial
     \begin{subfigure}[t]{0.6\linewidth}
         \centering
         \includegraphics[width=0.9\linewidth]{figures/pairwise.drawio.pdf}
-        \caption{for measuring similarities between utterances}
+        \caption{for measuring similarity between utterances}
         \label{fig:pairwise}
     \end{subfigure}
     \begin{subfigure}[t]{0.35\linewidth}
@@ -209,7 +300,7 @@ As mentioned in Section \ref{sec:aug}, we trained special models to perform dial
 
 We utilized a model for measuring the similarity between dialog utterances. In its basic form, it can be implemented as follows: take sentence embeddings of the utterances and compare the cosine similarities between them. Training such a model on sequential utterances using contrastive learning yields commendable utterance embeddings \cite{Zhou2022}.
 
-However, this approach has a significant drawback; it does not consider the context from several preceding utterances. In a dialogue, it is crucial to compare not just pairs of utterances but pairs of context-response. Therefore, we employed the following model (fig. \ref{fig:pairwise}):
+However, this approach has a significant drawback; it does not consider the context from several preceding utterances. In a dialogue, it is crucial to compare not just pairs of utterances but pairs of context-response. Therefore, we employed the following model (Fig. \ref{fig:pairwise}):
 
 \begin{enumerate}
     \item  First, embeddings for all context utterances $c=[u_1,\ldots,u_k]$ and the response $r$ are obtained using a pretrained sentence encoder.
@@ -231,13 +322,13 @@ The resulting model closely resembles the ConveRT model \cite{henderson2020conve
     \label{fig:pairwise-clister-heatmap}
 \end{figure}
 
-As a result, the obtained model is capable of recognizing individual stages in dialogues (fig. \ref{fig:pairwise-clister-heatmap}). This behavior is achieved due to two factors. Firstly, when a dialogue furthers to a new topic, the similarity between two consecutive utterances drops substantially. This is clearly visible, for example, in dialogues in which ordering a taxi replaces booking a table in a restaurant. Secondly, within one topic, there are also small drops in similarity in cases where there is a transition from one question to another. For example, the question “how many people should I book for?” replaces the question “which restaurant do you prefer?”. Moreover, since these questions relate to one topic, they remain close to themselves and distant to questions on other topics. Therefore, clusters are obtained.
+As a result, the obtained model is capable of recognizing individual stages in dialogues (Fig. \ref{fig:pairwise-clister-heatmap}). This behavior is achieved due to two factors. Firstly, when a dialogue furthers to a new topic, the similarity between two consecutive utterances drops substantially. This is clearly visible, for example, in dialogues in which ordering a taxi replaces booking a table in a restaurant. Secondly, within one topic, there are also small drops in similarity in cases where there is a transition from one question to another. For example, the question “how many people should I book for?” replaces the question “which restaurant do you prefer?”. Moreover, since these questions relate to one topic, they remain close to themselves and distant to questions on other topics. Therefore, clusters are obtained.
 
 (!provide the dialogue and change pic to vector instead of raster!)
 
 \subsection{Listwise Model}
 
-We trained the special model to merge utterances of two different dialogues (fig. \ref{fig:listwise}). It is a transformer over text embeddings of the utterances. Sentence encoder is \texttt{sentence-transformers/all-mpnet-base-v2} from hugging face. We used 4-layer transformer with 4 attention heads and hidden dimension twice smaller than sentence encoder's one, i.e. 384. Only 3 last layers of sentence encoder were fine-tuned in order to decrease computational costs.
+We trained the special model to merge utterances of two different dialogues (Fig. \ref{fig:listwise}). It is a transformer over text embeddings of the utterances. Sentence encoder is \texttt{sentence-transformers/all-mpnet-base-v2} from hugging face. We used 4-layer transformer with 4 attention heads and hidden dimension twice smaller than sentence encoder's one, i.e. 384. Only 3 last layers of sentence encoder were fine-tuned in order to decrease computational costs.
 
 Output ranks are transformed with softmax function. Then KL-divergence between output and target probabilities are minimized. Target probabilities are defined as softmax over true ranks of utterances, i.e. $-i$ for $i$-th utterance in dialogue.
 
@@ -247,7 +338,7 @@ To measure the sorting quality, we need to utilize appropriate metric. All tradi
 
 \section{Composition of Augmentations}
 
-In order to maximize diversity of training data, we use not only 5 basic augmentations described in section \ref{sec:aug}, but also 4 extra compositions of augmentations. All the resulting pipelines are defined in fig. \ref{fig:aug-compositions}. 
+In order to maximize diversity of training data, we use not only 5 basic augmentations described in section \ref{sec:aug}, but also 4 extra compositions of augmentations. All the resulting pipelines are defined in Fig. \ref{fig:aug-compositions}. 
 
 \begin{figure}[!htb]
     \centering
