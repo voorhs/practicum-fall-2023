@@ -36,11 +36,11 @@
 \rhead{ \textit{ }} 
 
 % Update your Headers here
-\fancyhead[LO]{Running Title for Header}
+% \fancyhead[LO]{Running Title for Header}
 % \fancyhead[RE]{Firstauthor and Secondauthor} % Firstauthor et al. if more than 2 - must use \documentclass[twoside]{article}
   
 %% Title
-\title{Contrastive Learning with Intent-Preserving and Intent-Corrupting Augmentations for Training Dialogue Embeddings.
+\title{Contrastive Learning with Augmentations for Training Dialogue Embeddings.
 %%%% Cite as
 %%%% Update your official citation here when published 
 \thanks{\textit{\underline{Citation}}: 
@@ -116,11 +116,9 @@ For an object $d$, its embedding $e(d)$ should convey some semantics of $d$. Thi
 
 \section{Related Works}
 
-\texttt{this section is incomplete, this is still a draft }
-
 \subsection{Text Embedding}
 
-One of the breakthroughs in text embedding came from the need for solving the task of semantic textual similarity \cite{reimers2019sentencebert}, i.e. comparing texts with each other. Previously existing methods were either weak (averaging word embeddings) or required enormous amount of computation (BERT cross-encoder). Comparing texts with bi-encoder is performed via averaging hidden states from the last transformer block of language model or taking hidden state of special token \texttt{[CLS]}. This setting opens up a possibility for clustering, retrieval, pair classification etc. within text domain \cite{muennighoff2023mteb}.
+One of the breakthroughs in text embedding arose from the necessity to address the task of semantic textual similarity \cite{reimers2019sentencebert}, which involves comparing texts. Previously existing methods were either weak, such as averaging word embeddings, or demanded a significant computational burden, as with the BERT cross-encoder. Text comparison using bi-encoders is accomplished by averaging hidden states from the last transformer block of the language model or by extracting the hidden state of the special token \texttt{[CLS]}. This configuration opens up possibilities for tasks such as clustering, retrieval, pair classification, and more within the realm of textual data \cite{muennighoff2023mteb}.
 
 \subsection{Contrastive Learning}
 
@@ -156,25 +154,24 @@ One of the most well-known methods for negative sampling was introduced by word2
 %     \caption{Negative sampling. Conceptual view on contrastive learning.}
 % \end{figure}
 
-The most efficient way of mining positive pairs is to use supervision. For example, datasets on NLI (natural language inference), QA (question answering), fact verification, paraphrases contain pairs of semantically similar texts and are appropriate for training text embedding \cite{li2023general}. This data is extremely clean, but scarce. Another way is to scrap data from web pages, such as QA forums (Quora), social media (Reddit), etc. This data is large, but can be noisy. When there are no any facility like supervised or scrapped pairs, augmentation is the last variant. Two augmented views of the same object must preserve semantics, that are essential for this object, but provide sufficiently hard task for a model of discriminating one positive sample from the rest of negative ones. 
+It is most effective to train embeddings using supervised positive pairs. For instance, datasets in the domains of natural language inference (NLI), question answering (QA), fact verification, and paraphrases contain pairs of semantically similar texts, making them suitable for training text embeddings \cite{li2023general}. This data is exceptionally clean but limited in quantity. Another approach involves scraping data from web pages, such as QA forums (e.g., Quora) and social media platforms (e.g., Reddit). This data is abundant, but can be noisy. When there are no readily available resources like supervised or scraped pairs, augmentation remains a viable option. In this case, two augmented views of the same object should preserve the essential semantics of the object while posing a challenging task for a model to discriminate one positive sample from the rest of the negative ones. 
 
-Present-day SoTA text embeddings such as BGE \cite{xiao2023cpack}, GTE \cite{li2023general}, E5 \cite{wang2022text} follow one pipeline of training. First, a retrieval-oriented language model is trained \cite{xiao2022retromae, gao-callan-2021-condenser}, that is a BERT-like model that can efficiently aggregate global information about input sequence. Second, a general-purpose fine-tuning is performed on a large weakly supervised text pairs with large batch contrastive learning. Third, task-specific fine-tuning is performed on supervised text pairs with 
-contrastive learning with hard negative samples.
+Present-day SoTA text embeddings such as BGE \cite{xiao2023cpack}, GTE \cite{li2023general}, E5 \cite{wang2022text} follow the same pipeline of training. First, a retrieval-oriented language model is trained \cite{xiao2022retromae, gao-callan-2021-condenser}, that is a BERT-like model that can efficiently aggregate global information about input sequence. Second, a general-purpose fine-tuning process is conducted using a large corpus of weakly supervised text pairs with large-batch contrastive learning. Finally, task-specific fine-tuning on supervised text pairs occurs employing contrastive learning with hard negative samples.
 
 \subsection{Similar Approaches}
 
-AugSBERT \cite{thakur2021augmented} cannot be viewed as the similar approach to ours. Its augmentation uses an already presented dataset of text pairs, which is absent in our case.
+\textbf{Text embedding.} Several existing text embedding methods employ contrastive learning with augmentation-mined positive and negative pairs. CERT \cite{fang2020cert} utilizes back-translation to mine positive pairs, while ConSERT \cite{yan-etal-2021-consert} employs various augmentations at the token level. Doc2vecC \cite{luo2021unsupervised} relies on thesaurus-based augmentations and back-translation for its approach.
 
-\textbf{Text embedding.} CERT \cite{fang2020cert} utilizes back-translation for mining positive pairs. ConSERT \cite{yan-etal-2021-consert} utilizes various augmentations at the token-level. Doc2vecC \cite{luo2021unsupervised} utilizes thesaurus-based augmentations and back-translation.
+\textbf{Dialogue embedding.} Dial2vec \cite{liu2022dial2vec} and DialogueCSE \cite{liu2021dialoguecse} modify transformer architecture by adding cross-attention between different groups of utterances after all transformer layers. To get a positive pair, both works employ the idea of self-guidence that is similar to ours, because they get two views of the same object. In Dial2vec, it's local vs. global information about a dialogue, whereas in DialogueCSE, it's the utterances of the first interlocutor vs. the utterances of the second interlocutor.
 
-\textbf{Dialogue embedding.} Dial2vec \cite{liu2022dial2vec} modifies transformer architecture by adding cross-attention between utterances of different participants. DialogueCSE \cite{liu2021dialoguecse} adds cross-attention between utterances of different stages of a dialogue.
-
-Our approach is distinct from these above:
+Our approach stands apart from the methods mentioned above for the following reasons:
 \begin{itemize}
-    \item our augmentations do not take objects outside the set of valid objects (do not violate grammars and meaningfulness), because our augmentations are thoroughly designed with context-aware language models in contrast to ConSERT that simply shuffles and deletes tokens leaving only lexical info in touch
-    \item our augmentations form a full-fledged set of transformations that construct non-obvious examples, not just paraphrasing or token-level replacements
-    \item our approach doesn't modify BERT architecture
+    \item Our set of augmentations is more potent than the one employed in CERT, comprising a comprehensive set of transformations that facilitate the creation of non-obvious examples, beyond mere paraphrasing.
+    \item Our augmentations adhere to the set of valid objects, preserving grammatical and meaningful constructs. They do not disrupt the structure of the dialogue, as they are meticulously designed with context-aware language models, unlike ConSERT, which employs simple token shuffling and deletion, retaining only lexical information.
+    \item our approach does not modify BERT architecture
 \end{itemize}
+
+TODO: add text about SimCLR?
 
 \section{Method}
 
@@ -199,55 +196,29 @@ Shuffling utterances doesn't change any intents, it only changes their order. Th
 
 To expand the set of augmentations even further, we use a composition of several ones. For more details on augmentation implementations, please refer to Appendix \ref{app:aug}.
 
-\subsection{Dialogue Encoder Architecture}
+\subsection{Encoder Fine-tuning}
 
-As a model for embedding, we try BERT \cite{devlin2019bert}, RoBERTa \cite{liu2019roberta}, RetroMAE \cite{xiao2022retromae} without any modifications. The input is \texttt{[CLS] ut1 [SEP] ut2 [SEP] ut3}, and the output is the hidden state of \texttt{[CLS]} token from the last layer. 
+As a model for embedding, we try BERT-like models without any modifications \cite{devlin2019bert}. The input is \texttt{[CLS] ut1 [SEP] ut2 [SEP] ut3}, and the output is the hidden state of \texttt{[CLS]} token from the last layer. 
 
 Also, we experiment with a slightly advanced dialogue language model, HSSA \cite{zhang-etal-2023-dialog}. It uses BERT as a backbone and modifies its attention mechanism to capture the hierarchical structure of dialogue and reach the computational trade-off between feeding a transformer separate utterances and feeding an entire dialogue.
 
-\subsection{Pre-train Task} \label{sec:pretrain}
+In our fine-tuning, a positive pair is obtained with intent-preserving augmentations of the same dialogue, and the remaining dialogues from the training batch are used as negative samples. In order to reduce required batch size, we utilize intent-corrupting augmentations as hard negative samples.
 
-In our case, $a, b$ are two intent-preserving augmentations of the same dialogue, and the remaining dialogues from the training batch are used as negative examples. This task simulates the second stage of training general-purpose text embeddings, which uses a large batch and weakly supervised text pairs. In addition to this, in order to reduce required batch size, we utilize intent-corrupting augmentations as hard negative samples. Notably, the technique with two augmentations and dual encoder resembles BYOL \cite{grill2020bootstrap}, well-known method for self-supervised learning \texttt{(maybe move this sentence to Related Works)}.
+\subsection{Evaluation} \label{sec:evaluation}
 
-\subsection{Evaluation}
+We evaluate dialogue embeddings in transfer learning setting. Specifically, our evaluation methods utilize frozen embeddings as features. Inspired by \cite{liu2022dial2vec} we employ these evaluation methods: 1) domain classification, 2) dialogue retrieval, 3) intent similarity. Evaluation is performed on MultiWOZ 2.2 dataset \cite{zang2020multiwoz}.
 
-We evaluate dialogue embeddings in transfer learning setting. Specifically, our evaluation methods utilize embeddings as features, without modifying the encoder model itself. Inspired by \cite{liu2022dial2vec} we employ these evaluation methods: 1) domain classification, 2) dialogue retrieval, 3) intent similarity. Evaluation is performed on MultiWOZ 2.2 dataset \cite{zang2020multiwoz}.
+\textbf{Domain classification.} The goal is to predict in which domain a dialogue is taking place. In dataset there are 7 domains: attraction, bus, hospital, hotel, restaurant, taxi, train. Each dialogue can take place in multiple domains at once. The method is to train a linear classifier upon dialogue embedding, this is the so-called linear probe evaluation, that is used in many works. F1-macro is used to measure quality. This evaluation method can demonstrate how well embeddings encode some implicit features about the dialogue and its participants in perspective.
 
-\textbf{Domain classification.} The goal is to predict in which domain a dialogue is taking place. In dataset there are 7 domains: attraction, bus, hospital, hotel, restaurant, taxi, train. Each dialogue can take place in multiple domains at once. The method is to train a linear classifier upon dialogue embedding, this is the so-called linear probe evaluation, that is used in many works. F1-macro is used to measure quality.
+\textbf{Dialogue retrieval.} For each dialogue from validation split, the goal is to retrieve dialogues from train split with at least one domain in common. Ranking score is calculated as cosine similarity between query and answer embeddings. Mean average precision at 100 is used to measure quality. This evaluation method can demonstrate potential effectiveness for retrieval and other downstream tasks like clustering.
 
-\textbf{Dialogue retrieval.} For each dialogue from validation split, the goal is to retrieve dialogues from train split with at least one domain in common. Ranking score is calculated as cosine similarity between query and answer embeddings. Mean average precision at 100 is used to measure quality.
-
-\textbf{Intent similarity.} We sample pairs of dialogues from train and validation splits of dataset. A linear classifier is trained on the former pairs and evaluated on the latter pairs using Pearson correlation between predicted similarity scores and gold ones. The gold scores are obtained using DGAC clustering \cite{dgac}. Clusters represent intents of dialogue participants. Hence, each dialogue can be associated with a set of intents. We define gold intent similarity of two dialogues as a dice similarity between their sets of intents.
+\textbf{Intent similarity.} We sample pairs of dialogues from train and validation splits of dataset. A linear regression is trained on the former pairs and evaluated on the latter pairs using Pearson correlation between predicted similarity scores and gold ones. The gold scores are obtained using DGAC clustering \cite{dgac}. Clusters represent intents of dialogue participants. Each dialogue can be associated with a set of intents. We define gold intent similarity of two dialogues as a dice similarity between their sets of intents.
 
 \section{Experiments}
 
-\textbf{Dataset.} In all experiments, we used the same dataset of dialogues. This dataset is a combination of several task-oriented dialogue datasets from DialogStudio \cite{zhang2023dialogstudio}. All the dialogues were filtered based on their length, resulting in a dataset comprising 501K dialogues. For more details on the dataset used, please refer to Appendix \ref{app:dataset}.
+this section is incomplete
 
-\textbf{Baseline Solution.} As our baseline solution, we employ BERT and BERT-RetroMAE without the pretraining method proposed by us. The results are presented in Table \ref{tab:eval}.
-
-\begin{table}[!htb]
-    \centering
-    \begin{tabular}{c|c|c|c|c}
-        & Service Clf & Categorization & Relatedness & Retrieval \\
-        \hline
-        BERT & 0.49 & & & \\
-        BERT-RetroMAE & & & & \\
-        BERT + Contr loss & 0.68 & & &
-    \end{tabular}
-    \caption{Dialogue embedding evaluation results.}
-    \label{tab:eval}
-\end{table}
-
-\section*{Acknowledgments}
-This was was supported in part by......
-
-%Bibliography
-\bibliographystyle{unsrt}  
-\bibliography{references}  
-
-\appendix
-\section{Dialogue Dataset} \label{app:dataset}
-Large dataset is important for contrastive learning. For training our models, we took a merge of some task-oriented datasets from DialogStudio collection \cite{zhang2023dialogstudio}. All of them are listed in the table \ref{tab:dataset}.
+\textbf{Dataset.} Large dataset is important for contrastive learning. In all experiments, we used the same dataset of dialogues. This dataset is a combination of several task-oriented dialogue datasets from DialogStudio \cite{zhang2023dialogstudio} which are listed in Table \ref{tab:dataset}. All the dialogues were filtered based on their length, resulting in a dataset comprising 501K dialogues.
 
 \begin{table}[!htb]
     \centering
@@ -273,6 +244,56 @@ Large dataset is important for contrastive learning. For training our models, we
     \caption{All the datasets are taken from DialogStudio collection \cite{zhang2023dialogstudio}. BERT tokenizer is used to count \# tokens column.}
     \label{tab:dataset}
 \end{table}
+
+
+First, we evaluate pre-trained models BERT \cite{devlin2019bert}, RoBERTa \cite{liu2019roberta}, RetroMAE \cite{xiao2022retromae}. Results are presented in Table \ref{tab:eval-raw}. This table describes existing results, that can be obtained by available model weights without any fine-tuning on dialogue data. 
+
+\begin{table}[!htb]
+    \centering
+\begin{tabular}{l|c|c|c}
+         & Classification & Retrieval & Similarity \\ \hline
+BERT     & $47.53$          & $66.31$     &            \\
+RoBERTa  & $48.66$          & $84.40$     &            \\
+RetroMAE & $69.84$          & $86.95$     &            \\
+\end{tabular}
+    \caption{Evaluation of available models. For the meaning of these values, see Section \ref{sec:evaluation}.}
+    \label{tab:eval-raw}
+\end{table}
+
+\textbf{(Weak) Training.} In our fine-tuning approach, we used the following settings: a batch size of 32, AdamW optimizer with a weight decay of 1e-2, and a fixed learning rate of 3e-6. We froze all transformer layers except the last one. It's worth noting that we applied only a partial set of augmentations and worked with just 10\% of the entire dataset. Evaluation results after one epoch of our contrastive fine-tuning on dialogue data are presented in Table \ref{tab:eval-one-epoch}.
+
+\begin{table}[!htb]
+    \centering
+\begin{tabular}{l|c|c|c}
+         & Classification & Retrieval      & Similarity \\ \hline
+BERT     & $67.18$ $(+19.65)$ & $77.99$ $(+11.68)$ &            \\
+RoBERTa  & $68.20$ $(+19.54)$ & $79.94$ $(-4.46)$  &            \\
+RetroMAE & $70.33$ $(+0.49)$  & $89.08$ $(+2.13)$  &           
+\end{tabular}
+    \caption{Evaluation after one epoch of contrastive fine-tuning. Number in parentheses is a difference with results in Table \ref{tab:eval-raw}. For the meaning of these values, see Section \ref{sec:evaluation}.}
+    \label{tab:eval-one-epoch}
+\end{table}
+
+\section{Limitations.}
+
+Out method has several limitations.
+
+\begin{itemize}
+    \item The weights obtained are specific to the language used. Consequently, it is necessary to gather dialogues in the target language, train auxiliary pairwise and listwise models, and subsequently employ contrastive fine-tuning on a BERT-like encoder. An alternative approach to address this challenge is to accumulate multilingual data.
+    \item All experiments were conducted with a complete dialogue inputted directly into the transformer, which is constrained by the maximum number of tokens in the input sequence. One potential resolution is to utilize the HSSA model, designed for handling individual utterances. However, this option may result in a reduction in quality.
+\end{itemize}
+
+\section{Conclusion.}
+
+A study has been conducted on building embeddings for task-oriented dialogues. A procedure for contrastive learning with augmentations that preserve and corrupt interlocutors' intents was proposed. The effectiveness of this procedure was demonstrated for BERT-like models in tasks such as dialogue classification, retrieval, and similarity. An ablation study was conducted, showing the contribution of each type of augmentation to the final embeddings.
+
+
+
+%Bibliography
+\bibliographystyle{unsrt}  
+\bibliography{references}  
+
+\appendix
 
 \section{Auxiliary Models} \label{app:aug}
 
